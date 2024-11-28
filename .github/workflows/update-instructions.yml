@@ -5,8 +5,8 @@ on:
     branches:
       - main
     paths:
-      - scenarios/**/setting.json
-      - scenarios/**/instruction.txt
+      - update_scenario_path.txt
+
 jobs:
   update-instructions:
     runs-on: ubuntu-latest
@@ -14,125 +14,101 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
 
       - name: Update OpenAI Assistant Instructions
         run: |
-          # マージコミット前後での差分を比較
-          UPDATED_FILES=$(git diff HEAD^ --name-only | tr -d '"')
+          # ファイルが存在するか確認
+          if [[ -f update_scenario_path.txt ]]; then
+            echo "Reading paths from update_scenario_path.txt..."
+            while IFS= read -r path; do
+              echo ""
+              echo "========================="
+              echo "Processing $path"
+              # ここで任意の処理を実行
+              # 例: ファイルの内容を表示
+              if [[ -d $path ]]; then
 
-          # チェック対象のパターン
-          TARGET_FILES=("setting.json" "instruction.txt")
+                SETTING_FILE="${path}/setting.json"
+                ASSISTANT_ID=$(jq -r '.assistant_id' "$SETTING_FILE")
+                ASSISTANT_NAME=$(jq -r '.assistant_name' "$SETTING_FILE")
+                MODEL=$(jq -r '.model' "$SETTING_FILE")
+                TOP_P=$(jq -r '.top_p' "$SETTING_FILE")
+                TEMPERATURE=$(jq -r '.temperature' "$SETTING_FILE")
+                RESPONSE_FORMAT=$(jq '.response_format' "$SETTING_FILE")
+                TENANT_NAME=$(jq -r '.tenant_name' "$SETTING_FILE")
+                INSTRUCTION_FILE="${path}/instruction.txt"
+                INSTRUCTION=$(cat "$INSTRUCTION_FILE")
 
-          # 一致するディレクトリを格納する配列
-          MATCHED_DIRS=()
+                case "$TENANT_NAME" in
+                "demo")
+                  PROJECT_API_KEY="${{ secrets.OPENAI_DEMO_PROJECT_API_KEY }}"
+                  ;;
+                "rakuten-cc")
+                  PROJECT_API_KEY="${{ secrets.OPENAI_RAKUTEN_CC_PROJECT_API_KEY }}"
+                  ;;
+                "rakuten-rookie")
+                  PROJECT_API_KEY="${{ secrets.OPENAI_RAKUTEN_ROOKIE_PROJECT_API_KEY }}"
+                  ;;
+                "bs24")
+                  PROJECT_API_KEY="${{ secrets.OPENAI_BS_24_PROJECT_API_KEY }}"
+                  ;;
+                *)
+                  echo "Error: Unknown tenant_name ${TENANT_NAME}"
+                  exit 1
+                  ;;
+                esac
 
-          # 差分ファイルを1つずつ処理
-          while IFS= read -r file; do
-            echo "Processing file: $file"
+                # JSONデータの安全な生成
+                JSON_PAYLOAD=$(jq -n \
+                  --arg name "$ASSISTANT_NAME" \
+                  --arg instructions "$INSTRUCTION" \
+                  --arg model "$MODEL" \
+                  --argjson response_format "$RESPONSE_FORMAT" \
+                  --argjson top_p "$TOP_P" \
+                  --argjson temperature "$TEMPERATURE" \
+                  '{
+                    name: $name,
+                    instructions: $instructions,
+                    model: $model,
+                    top_p: $top_p,
+                    temperature: $temperature,
+                    response_format: $response_format
+                  }')
 
-            # ファイル名のみ取得
-            base_name=$(basename "$file")
-            echo "Base name: $base_name"
+                # ASSISTANT_IDの有無でcreate or updateを判定
+                if [[ -n "$ASSISTANT_ID" ]]; then
+                  URL="https://api.openai.com/v1/assistants/${ASSISTANT_ID}"
+                else
+                  URL="https://api.openai.com/v1/assistants"
+                fi
 
-            echo "Target files: ${TARGET_FILES[*]}"
+                # curlコマンドでリクエストを送信
+                RESPONSE=$(curl -s -o response.json -w "%{http_code}" \
+                  -X POST \
+                  "$URL" \
+                  -H "Content-Type: application/json" \
+                  -H "OpenAI-Beta: assistants=v2" \
+                  -H "Authorization: Bearer ${PROJECT_API_KEY}" \
+                  -d "$JSON_PAYLOAD")
 
-            # ファイル名がターゲットに一致するか確認
-            for target in "${TARGET_FILES[@]}"; do
-              if [[ "$base_name" == "$target" ]]; then
-                dir_name=$(dirname "$file")
-                MATCHED_DIRS+=("$dir_name")
-                echo "Matched directory: $dir_name"
+                # HTTPステータスコードの確認
+                if [[ "$RESPONSE" -ne 200 ]]; then
+                  echo "Error: API request failed with status code $RESPONSE."
+                  echo "Response:"
+                  cat response.json
+                  exit 1
+                fi
+
+                # 正常終了の場合
+                echo "Request was successful. Response:"
+                cat response.json
+
+              else
+                echo "$path does not exist."
+                exit 1
               fi
-            done
-          done <<< "$UPDATED_FILES"
-
-          # 一意なディレクトリを取得
-          UNIQUE_DIRS=($(printf "%s\n" "${MATCHED_DIRS[@]}" | sort -u))
-
-          # 結果を出力
-          echo "Matched directories:"
-          printf "%s\n" "${UNIQUE_DIRS[@]}"
-
-          # UNIQUE_DIRS をループして処理
-          for dir in $UNIQUE_DIRS; do
-            echo ""
-            echo "========================="
-            echo "Processing $dir"
-
-            SETTING_FILE="${dir}/setting.json"
-            ASSISTANT_ID=$(jq -r '.assistant_id' "$SETTING_FILE")
-            ASSISTANT_NAME=$(jq -r '.assistant_name' "$SETTING_FILE")
-            MODEL=$(jq -r '.model' "$SETTING_FILE")
-            TOP_P=$(jq -r '.top_p' "$SETTING_FILE")
-            TEMPERATURE=$(jq -r '.temperature' "$SETTING_FILE")
-            RESPONSE_FORMAT=$(jq '.response_format' "$SETTING_FILE")
-            TENANT_NAME=$(jq -r '.tenant_name' "$SETTING_FILE")
-            INSTRUCTION_FILE="${dir}/instruction.txt"
-            INSTRUCTION=$(cat "$INSTRUCTION_FILE")
-
-            case "$TENANT_NAME" in
-            "demo")
-              PROJECT_API_KEY="${{ secrets.OPENAI_DEMO_PROJECT_API_KEY }}"
-              ;;
-            "rakuten-cc")
-              PROJECT_API_KEY="${{ secrets.OPENAI_RAKUTEN_CC_PROJECT_API_KEY }}"
-              ;;
-            "rakuten-rookie")
-              PROJECT_API_KEY="${{ secrets.OPENAI_RAKUTEN_ROOKIE_PROJECT_API_KEY }}"
-              ;;
-            "bs24")
-              PROJECT_API_KEY="${{ secrets.OPENAI_BS_24_PROJECT_API_KEY }}"
-              ;;
-            *)
-              echo "Error: Unknown tenant_name ${TENANT_NAME}"
-              exit 1
-              ;;
-            esac
-
-            # JSONデータの安全な生成
-            JSON_PAYLOAD=$(jq -n \
-              --arg name "$ASSISTANT_NAME" \
-              --arg instructions "$INSTRUCTION" \
-              --arg model "$MODEL" \
-              --argjson response_format "$RESPONSE_FORMAT" \
-              --argjson top_p "$TOP_P" \
-              --argjson temperature "$TEMPERATURE" \
-              '{
-                name: $name,
-                instructions: $instructions,
-                model: $model,
-                top_p: $top_p,
-                temperature: $temperature,
-                response_format: $response_format
-              }')
-
-            # ASSISTANT_IDの有無でcreate or updateを判定
-            if [[ -n "$ASSISTANT_ID" ]]; then
-              URL="https://api.openai.com/v1/assistants/${ASSISTANT_ID}"
-            else
-              URL="https://api.openai.com/v1/assistants"
-            fi
-
-            # curlコマンドでリクエストを送信
-            RESPONSE=$(curl -s -o response.json -w "%{http_code}" \
-              -X POST \
-              "$URL" \
-              -H "Content-Type: application/json" \
-              -H "OpenAI-Beta: assistants=v2" \
-              -H "Authorization: Bearer ${PROJECT_API_KEY}" \
-              -d "$JSON_PAYLOAD")
-
-            # HTTPステータスコードの確認
-            if [[ "$RESPONSE" -ne 200 ]]; then
-              echo "Error: API request failed with status code $RESPONSE."
-              echo "Response:"
-              cat response.json
-              exit 1
-            fi
-
-            # 正常終了の場合
-            echo "Request was successful. Response:"
-            cat response.json
-          done
+            done < update_scenario_path.txt
+          else
+            echo "update_scenario_path.txt not found. Exiting."
+            exit 1
+          fi
