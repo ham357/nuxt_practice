@@ -7,10 +7,6 @@ on:
     paths:
       - scenarios/**/setting.json
       - scenarios/**/instruction.txt
-    paths-ignore:
-      - scenarios/**/common/setting.json
-      - scenarios/template/**/setting.json
-      - scenarios/template/**/instruction.txt
 
 jobs:
   upsert-instructions:
