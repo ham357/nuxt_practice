@@ -5,5 +5,5 @@
   "top_p": 0.01,
   "temperature": 0.01,
   "response_format": "auto",
-  "tenant_name": "rakuten-rookie"
+  "tenant_name": "demo"
 }
