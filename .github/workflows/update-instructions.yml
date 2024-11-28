@@ -16,9 +16,14 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Install yq
-        run: sudo apt-get install -y yq
+        run: |
+          wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq
+          chmod +x /usr/bin/yq
 
-      - name: Update OpenAI Assistant Instructions using curl
+      - name: Check yq version
+        run: yq --version
+
+      - name: Update OpenAI Assistant Instructions
         env:
           OPENAI_DEMO_PROJECT_API_KEY: ${{ secrets.OPENAI_DEMO_PROJECT_API_KEY }}
           OPENAI_RAKUTEN_CC_PROJECT_API_KEY: ${{ secrets.OPENAI_RAKUTEN_CC_PROJECT_API_KEY }}
@@ -31,7 +36,6 @@ jobs:
           INSTRUCTIONS=$(yq '.instructions' openapi/assistant/update_instructions.yaml)
 
           # tenant_name に応じて環境変数を切り替え
-          # 環境追加毎に追加する
           case "$TENANT_NAME" in
             "demo")
               PROJECT_API_KEY="${OPENAI_DEMO_PROJECT_API_KEY}"
