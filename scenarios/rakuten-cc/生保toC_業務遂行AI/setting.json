@@ -4,6 +4,65 @@
   "model": "gpt-4o-2024-08-06",
   "top_p": 0.01,
   "temperature": 0.01,
-  "response_format": '{"type":"json_schema","json_schema":{"name":"evaluation_response","description":null,"schema":{"type":"object","properties":{"evaluations":{"type":"array","items":{"type":"object","properties":{"scenario_task":{"type":"string"},"task_category":{"type":"string"},"evaluation":{"type":"string","enum":["達成","未達成"]},"good_point":{"type":"string"},"improve_point":{"type":"string"},"video_url":{"type":"string"},"video_title":{"type":"string"}},"required":["scenario_task","task_category","evaluation","good_point","improve_point","video_url","video_title"],"additionalProperties":false}}},"required":["evaluations"],"additionalProperties":false},"strict":true}}',
+  "response_format": {
+    "type": "json_schema",
+    "json_schema": {
+      "name": "evaluation_response",
+      "description": null,
+      "schema": {
+        "type": "object",
+        "properties": {
+          "evaluations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "scenario_task": {
+                  "type": "string"
+                },
+                "task_category": {
+                  "type": "string"
+                },
+                "evaluation": {
+                  "type": "string",
+                  "enum": [
+                    "達成",
+                    "未達成"
+                  ]
+                },
+                "good_point": {
+                  "type": "string"
+                },
+                "improve_point": {
+                  "type": "string"
+                },
+                "video_url": {
+                  "type": "string"
+                },
+                "video_title": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "scenario_task",
+                "task_category",
+                "evaluation",
+                "good_point",
+                "improve_point",
+                "video_url",
+                "video_title"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "evaluations"
+        ],
+        "additionalProperties": false
+      },
+      "strict": true
+    }
+  },
   "tenant_name": "rakuten-rookie"
 }
