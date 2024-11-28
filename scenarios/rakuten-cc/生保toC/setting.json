@@ -4,6 +4,8 @@
   "model": "gpt-4o-2024-08-06",
   "top_p": 0.01,
   "temperature": 0.01,
-  "response_format": "text",
+  "response_format": {
+    "type": "text"
+  },
   "tenant_name": "rakuten-rookie"
 }
