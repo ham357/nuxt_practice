@@ -31,7 +31,7 @@ jobs:
           cmd: |
             yq '.tenant_name' openapi/assistant/update_instructions.yaml
       - name: Set environment variables TENANT_NAME
-        run: echo "TENANT_NAME=${{ steps.tenant_name.outputs.result }}" >> $GITHUB_ENV
+        run: echo "TENANT_NAME=${{ steps.get_tenant_name.outputs.result }}" >> $GITHUB_ENV
 
       - name: Extract instructions
         id: get_instructions
