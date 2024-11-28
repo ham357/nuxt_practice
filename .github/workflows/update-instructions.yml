@@ -19,8 +19,8 @@ jobs:
 
       - name: Update OpenAI Assistant Instructions
         run: |
-          # 現在のブランチと `main` ブランチの差分を取得
-          UPDATED_FILES=$(git diff --name-only origin/main...HEAD | tr -d '"')
+          # マージコミット前後での差分を比較
+          UPDATED_FILES=$(git diff HEAD^ --name-only | tr -d '"')
 
           # チェック対象のパターン
           TARGET_FILES=("setting.json" "instruction.txt")
