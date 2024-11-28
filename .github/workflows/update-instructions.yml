@@ -25,7 +25,8 @@ jobs:
               # ここで任意の処理を実行
               # 例: ファイルの内容を表示
               if [[ -d $path ]]; then
-                SETTING_FILE = "${path}/setting.json"
+
+                SETTING_FILE="${path}/setting.json"
                 ASSISTANT_ID=$(jq -r '.assistant_id' "$SETTING_FILE")
                 ASSISTANT_NAME=$(jq -r '.assistant_name' "$SETTING_FILE")
                 MODEL=$(jq -r '.model' "$SETTING_FILE")
@@ -33,7 +34,7 @@ jobs:
                 TEMPERATURE=$(jq -r '.temperature' "$SETTING_FILE")
                 RESPONSE_FORMAT=$(jq -r '.response_format' "$SETTING_FILE")
                 TENANT_NAME=$(jq -r '.tenant_name' "$SETTING_FILE")
-                INSTRUCTION_FILE = "${path}/instruction.txt"
+                INSTRUCTION_FILE="${path}/instruction.txt"
                 INSTRUCTION=$(cat "$INSTRUCTION_FILE" | jq -Rsa .)
 
                 case "$TENANT_NAME" in
