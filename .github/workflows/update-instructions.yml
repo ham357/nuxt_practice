@@ -21,6 +21,8 @@ jobs:
           if [[ -f update_scenario_path.txt ]]; then
             echo "Reading paths from update_scenario_path.txt..."
             while IFS= read -r path; do
+              echo ""
+              echo "========================="
               echo "Processing $path"
               # ここで任意の処理を実行
               # 例: ファイルの内容を表示
