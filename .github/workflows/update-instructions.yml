@@ -20,9 +20,9 @@ jobs:
         uses: mikefarah/yq@master
         with:
           cmd: |
-            echo "ASSISTANT_ID=$(yq '.assistant_id' openapi/assistant/update_instructions.yaml')" >> $GITHUB_ENV
-            echo "TENANT_NAME=$(yq '.tenant_name' openapi/assistant/update_instructions.yaml')" >> $GITHUB_ENV
-            echo "INSTRUCTIONS=$(yq '.instructions' openapi/assistant/update_instructions.yaml')" >> $GITHUB_ENV
+            echo "ASSISTANT_ID=$(yq '.assistant_id' ./openapi/assistant/update_instructions.yaml')" >> $GITHUB_ENV
+            echo "TENANT_NAME=$(yq '.tenant_name' ./openapi/assistant/update_instructions.yaml')" >> $GITHUB_ENV
+            echo "INSTRUCTIONS=$(yq '.instructions' ./openapi/assistant/update_instructions.yaml')" >> $GITHUB_ENV
 
       - name: Set API Key based on tenant_name
         run: |
