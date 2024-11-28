@@ -18,8 +18,8 @@ jobs:
       - name: Update OpenAI Assistant Instructions
         run: |
           # ファイルが存在するか確認
-          if [[ -f paths.txt ]]; then
-            echo "Reading paths from paths.txt..."
+          if [[ -f update_scenario_path.txt ]]; then
+            echo "Reading paths from update_scenario_path.txt..."
             while IFS= read -r path; do
               echo "Processing $path"
               # ここで任意の処理を実行
