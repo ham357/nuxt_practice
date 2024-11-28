@@ -18,7 +18,7 @@ jobs:
       - name: Update OpenAI Assistant Instructions
         run: |
           # 現在のブランチと `main` ブランチの差分を取得
-          UPDATED_FILES=$(git diff --name-only main)
+          UPDATED_FILES=$(git diff --name-only main | tr -d '"')
 
           # チェック対象のパターン
           TARGET_FILES=("setting.json" "instruction.txt")
@@ -27,24 +27,31 @@ jobs:
           MATCHED_DIRS=()
 
           # 差分ファイルを1つずつ処理
-          for file in $UPDATED_FILES; do
+          while IFS= read -r file; do
+            echo "Processing file: $file"
+
             # ファイル名のみ取得
             base_name=$(basename "$file")
+            echo "Base name: $base_name"
+
+            echo "Target files: ${TARGET_FILES[*]}"
 
             # ファイル名がターゲットに一致するか確認
-            if [[ " ${TARGET_FILES[*]} " =~ " $base_name " ]]; then
-              # ディレクトリ部分を抽出してリストに追加
-              dir_name=$(dirname "$file")
-              MATCHED_DIRS+=("$dir_name")
-            fi
-          done
+            for target in "${TARGET_FILES[@]}"; do
+              if [[ "$base_name" == "$target" ]]; then
+                dir_name=$(dirname "$file")
+                MATCHED_DIRS+=("$dir_name")
+                echo "Matched directory: $dir_name"
+              fi
+            done
+          done <<< "$UPDATED_FILES"
 
           # 一意なディレクトリを取得
-          UNIQUE_DIRS=$(printf "%s\n" "${MATCHED_DIRS[@]}" | sort -u)
+          UNIQUE_DIRS=($(printf "%s\n" "${MATCHED_DIRS[@]}" | sort -u))
 
           # 結果を出力
           echo "Matched directories:"
-          echo "$UNIQUE_DIRS"
+          printf "%s\n" "${UNIQUE_DIRS[@]}"
 
           # UNIQUE_DIRS をループして処理
           for dir in $UNIQUE_DIRS; do
