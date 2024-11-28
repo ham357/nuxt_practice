@@ -15,77 +15,77 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-    - name: Update OpenAI Assistant Instructions
+      - name: Update OpenAI Assistant Instructions
         run: |
-        # ファイルが存在するか確認
-        if [[ -f paths.txt ]]; then
-          echo "Reading paths from paths.txt..."
-          while IFS= read -r path; do
-            echo "Processing $path"
-            # ここで任意の処理を実行
-            # 例: ファイルの内容を表示
-            if [[ -d $path ]]; then
-              cat "$path"
+          # ファイルが存在するか確認
+          if [[ -f paths.txt ]]; then
+            echo "Reading paths from paths.txt..."
+            while IFS= read -r path; do
+              echo "Processing $path"
+              # ここで任意の処理を実行
+              # 例: ファイルの内容を表示
+              if [[ -d $path ]]; then
+                cat "$path"
 
-              SETTING_FILE = "${path}/setting.json"
-              ASSISTANT_ID=$(jq -r '.assistant_id' "$SETTING_FILE")
-              ASSISTANT_NAME=$(jq -r '.assistant_name' "$SETTING_FILE")
-              MODEL=$(jq -r '.model' "$SETTING_FILE")
-              TOP_P=$(jq -r '.top_p' "$SETTING_FILE")
-              TEMPERATURE=$(jq -r '.temperature' "$SETTING_FILE")
-              RESPONSE_FORMAT=$(jq -r '.response_format' "$SETTING_FILE")
-              TENANT_NAME=$(jq -r '.tenant_name' "$SETTING_FILE")
-              INSTRUCTION_FILE = "${path}/instruction.txt"
-              INSTRUCTION=$(cat "$INSTRUCTION_FILE" | jq -Rsa .)
+                SETTING_FILE = "${path}/setting.json"
+                ASSISTANT_ID=$(jq -r '.assistant_id' "$SETTING_FILE")
+                ASSISTANT_NAME=$(jq -r '.assistant_name' "$SETTING_FILE")
+                MODEL=$(jq -r '.model' "$SETTING_FILE")
+                TOP_P=$(jq -r '.top_p' "$SETTING_FILE")
+                TEMPERATURE=$(jq -r '.temperature' "$SETTING_FILE")
+                RESPONSE_FORMAT=$(jq -r '.response_format' "$SETTING_FILE")
+                TENANT_NAME=$(jq -r '.tenant_name' "$SETTING_FILE")
+                INSTRUCTION_FILE = "${path}/instruction.txt"
+                INSTRUCTION=$(cat "$INSTRUCTION_FILE" | jq -Rsa .)
 
-              case "$TENANT_NAME" in
-                "demo")
-                  echo "PROJECT_API_KEY=${{ secrets.OPENAI_DEMO_PROJECT_API_KEY }}"
-                  ;;
-                "rakuten-cc")
-                  echo "PROJECT_API_KEY=${{ secrets.OPENAI_RAKUTEN_CC_PROJECT_API_KEY }}"
-                  ;;
-                "rakuten-rookie")
-                  echo "PROJECT_API_KEY=${{ secrets.OPENAI_RAKUTEN_ROOKIE_PROJECT_API_KEY }}"
-                  ;;
-                "bs24")
-                  echo "PROJECT_API_KEY=${{ secrets.OPENAI_BS_24_PROJECT_API_KEY }}"
-                  ;;
-                *)
-                  echo "Error: Unknown tenant_name '${{ TENANT_NAME }}'"
+                case "$TENANT_NAME" in
+                  "demo")
+                    echo "PROJECT_API_KEY=${{ secrets.OPENAI_DEMO_PROJECT_API_KEY }}"
+                    ;;
+                  "rakuten-cc")
+                    echo "PROJECT_API_KEY=${{ secrets.OPENAI_RAKUTEN_CC_PROJECT_API_KEY }}"
+                    ;;
+                  "rakuten-rookie")
+                    echo "PROJECT_API_KEY=${{ secrets.OPENAI_RAKUTEN_ROOKIE_PROJECT_API_KEY }}"
+                    ;;
+                  "bs24")
+                    echo "PROJECT_API_KEY=${{ secrets.OPENAI_BS_24_PROJECT_API_KEY }}"
+                    ;;
+                  *)
+                    echo "Error: Unknown tenant_name '${{ TENANT_NAME }}'"
+                    exit 1
+                    ;;
+                esac
+
+                RESPONSE=$(curl -s -o response.json -w "%{http_code}" \
+                  -X POST \
+                  "https://api.openai.com/v1/assistants/${{ ASSISTANT_ID }}" \
+                  -H "Content-Type: application/json" \
+                  -H "OpenAI-Beta: assistants=v2" \
+                  -H "OpenAI-Project: ${{ PROJECT_API_KEY }}" \
+                  -d "{
+                    \"instructions\": \"${{ INSTRUCTION }}\",
+                    \"model\": \"${{ MODEL }}\",
+                    \"top_p\": ${{ TOP_P }},
+                    \"temperature\": ${{ TEMPERATURE }},
+                    \"response_format\": \"${{ RESPONSE_FORMAT }}\"
+                  }")
+
+                if [ "$RESPONSE" -ne 200 ]; then
+                  echo "Failed to update assistant instructions"
+                  cat response.json
                   exit 1
-                  ;;
-              esac
+                else
+                  echo "Assistant instructions updated successfully"
+                  cat response.json
+                fi
 
-              RESPONSE=$(curl -s -o response.json -w "%{http_code}" \
-                -X POST \
-                "https://api.openai.com/v1/assistants/${{ ASSISTANT_ID }}" \
-                -H "Content-Type: application/json" \
-                -H "OpenAI-Beta: assistants=v2" \
-                -H "OpenAI-Project: ${{ PROJECT_API_KEY }}" \
-                -d "{
-                  \"instructions\": \"${{ INSTRUCTION }}\",
-                  \"model\": \"${{ MODEL }}\",
-                  \"top_p\": ${{ TOP_P }},
-                  \"temperature\": ${{ TEMPERATURE }},
-                  \"response_format\": \"${{ RESPONSE_FORMAT }}\"
-                }")
-
-              if [ "$RESPONSE" -ne 200 ]; then
-                echo "Failed to update assistant instructions"
-                cat response.json
-                exit 1
               else
-                echo "Assistant instructions updated successfully"
-                cat response.json
+                echo "$path does not exist."
+                exit 1
               fi
-
-            else
-              echo "$path does not exist."
-              exit 1
-            fi
-          done < paths.txt
-        else
-          echo "paths.txt not found. Exiting."
-          exit 1
-        fi
+            done < paths.txt
+          else
+            echo "paths.txt not found. Exiting."
+            exit 1
+          fi
