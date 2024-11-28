@@ -61,7 +61,7 @@ jobs:
                   "https://api.openai.com/v1/assistants/${ASSISTANT_ID}" \
                   -H "Content-Type: application/json" \
                   -H "OpenAI-Beta: assistants=v2" \
-                  -H "OpenAI-Project: ${PROJECT_API_KEY}" \
+                  -H "Authorization: Bearer ${PROJECT_API_KEY}" \
                   -d "{
                     \"instructions\": \"${INSTRUCTION}\",
                     \"model\": \"${MODEL}\",
