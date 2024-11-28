@@ -1,2 +1,1 @@
 scenarios/rakuten-cc/生保toC
-scenarios/rakuten-cc/生保toC
