@@ -60,13 +60,14 @@ jobs:
 
                 # JSONデータの安全な生成
                 JSON_PAYLOAD=$(jq -n \
+                  --arg name "$ASSISTANT_NAME" \
                   --arg instructions "$INSTRUCTION" \
                   --arg model "$MODEL" \
                   --arg response_format "$RESPONSE_FORMAT" \
                   --argjson top_p "$TOP_P" \
                   --argjson temperature "$TEMPERATURE" \
                   '{
-                    name: $ASSISTANT_NAME,
+                    name: $name,
                     instructions: $instructions,
                     model: $model,
                     top_p: $top_p,
