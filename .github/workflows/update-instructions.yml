@@ -56,28 +56,47 @@ jobs:
                     ;;
                 esac
 
+                # 必要な変数の存在を確認
+                if [[ -z "$ASSISTANT_ID" || -z "$PROJECT_API_KEY" || -z "$MODEL" || -z "$TOP_P" || -z "$TEMPERATURE" || -z "$RESPONSE_FORMAT" || -z "$INSTRUCTION" ]]; then
+                  echo "Error: Missing one or more required variables."
+                  exit 1
+                fi
+
+                # JSONデータの安全な生成
+                JSON_PAYLOAD=$(jq -n \
+                  --arg instructions "$INSTRUCTION" \
+                  --arg model "$MODEL" \
+                  --arg response_format "$RESPONSE_FORMAT" \
+                  --argjson top_p "$TOP_P" \
+                  --argjson temperature "$TEMPERATURE" \
+                  '{
+                    instructions: $instructions,
+                    model: $model,
+                    top_p: $top_p,
+                    temperature: $temperature,
+                    response_format: $response_format
+                  }')
+
+                # curlコマンドでリクエストを送信
                 RESPONSE=$(curl -s -o response.json -w "%{http_code}" \
                   -X POST \
                   "https://api.openai.com/v1/assistants/${ASSISTANT_ID}" \
                   -H "Content-Type: application/json" \
                   -H "OpenAI-Beta: assistants=v2" \
                   -H "Authorization: Bearer ${PROJECT_API_KEY}" \
-                  -d "{
-                    \"instructions\": \"${INSTRUCTION}\",
-                    \"model\": \"${MODEL}\",
-                    \"top_p\": ${TOP_P},
-                    \"temperature\": ${TEMPERATURE},
-                    \"response_format\": \"${RESPONSE_FORMAT}\"
-                  }")
+                  -d "$JSON_PAYLOAD")
 
-                if [ "$RESPONSE" -ne 200 ]; then
-                  echo "Failed to update assistant instructions"
+                # HTTPステータスコードの確認
+                if [[ "$RESPONSE" -ne 200 ]]; then
+                  echo "Error: API request failed with status code $RESPONSE."
+                  echo "Response:"
                   cat response.json
                   exit 1
-                else
-                  echo "Assistant instructions updated successfully"
-                  cat response.json
                 fi
+
+                # 正常終了の場合
+                echo "Request was successful. Response:"
+                cat response.json
 
               else
                 echo "$path does not exist."
