@@ -35,7 +35,7 @@ jobs:
                 RESPONSE_FORMAT=$(jq -r '.response_format' "$SETTING_FILE")
                 TENANT_NAME=$(jq -r '.tenant_name' "$SETTING_FILE")
                 INSTRUCTION_FILE="${path}/instruction.txt"
-                INSTRUCTION=$(cat "$INSTRUCTION_FILE" | jq -Rsa .)
+                INSTRUCTION=$(cat "$INSTRUCTION_FILE")
 
                 case "$TENANT_NAME" in
                 "demo")
