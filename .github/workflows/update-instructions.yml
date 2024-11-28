@@ -1,0 +1,72 @@
+name: Update OpenAI Assistant Instructions
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - openapi/assistant/update_instructions.yaml
+
+jobs:
+  update-instructions:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install yq
+        run: sudo apt-get install -y yq
+
+      - name: Update OpenAI Assistant Instructions using curl
+        env:
+          OPENAI_DEMO_PROJECT_API_KEY: ${{ secrets.OPENAI_DEMO_PROJECT_API_KEY }}
+          OPENAI_RAKUTEN_CC_PROJECT_API_KEY: ${{ secrets.OPENAI_RAKUTEN_CC_PROJECT_API_KEY }}
+          OPENAI_RAKUTEN_ROOKIE_PROJECT_API_KEY: ${{ secrets.OPENAI_RAKUTEN_ROOKIE_PROJECT_API_KEY }}
+          OPENAI_BS_24_PROJECT_API_KEY: ${{ secrets.OPENAI_BS_24_PROJECT_API_KEY }}
+        run: |
+          # openapi/assistant/update_instructions.yamlを読み込んで変数に設定
+          ASSISTANT_ID=$(yq '.assistant_id' openapi/assistant/update_instructions.yaml)
+          TENANT_NAME=$(yq '.tenant_name' openapi/assistant/update_instructions.yaml)
+          INSTRUCTIONS=$(yq '.instructions' openapi/assistant/update_instructions.yaml)
+
+          # tenant_name に応じて環境変数を切り替え
+          # 環境追加毎に追加する
+          case "$TENANT_NAME" in
+            "demo")
+              PROJECT_API_KEY="${OPENAI_DEMO_PROJECT_API_KEY}"
+              ;;
+            "rakuten-cc")
+              PROJECT_API_KEY="${OPENAI_RAKUTEN_CC_PROJECT_API_KEY}"
+              ;;
+            "rakuten-rookie")
+              PROJECT_API_KEY="${OPENAI_RAKUTEN_ROOKIE_PROJECT_API_KEY}"
+              ;;
+            "bs24")
+              PROJECT_API_KEY="${OPENAI_BS_24_PROJECT_API_KEY}"
+              ;;
+            *)
+              echo "Error: Unknown project_api_key '$TENANT_NAME'"
+              exit 1
+              ;;
+          esac
+
+          # OpenAI APIにリクエスト
+          RESPONSE=$(curl -s -o response.json -w "%{http_code}" \
+            -X POST \
+            "https://api.openai.com/v1/assistants/$ASSISTANT_ID" \
+            -H "Content-Type: application/json" \
+            -H "OpenAI-Beta: assistants=v2" \
+            -H "OpenAI-Project: $PROJECT_API_KEY" \
+            -d "{
+              \"instructions\": \"$INSTRUCTIONS\"
+            }")
+
+          if [ "$RESPONSE" -ne 200 ]; then
+            echo "Failed to update assistant instructions"
+            cat response.json
+            exit 1
+          else
+            echo "Assistant instructions updated successfully"
+            cat response.json
+          fi
