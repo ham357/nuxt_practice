@@ -66,6 +66,7 @@ jobs:
                   --argjson top_p "$TOP_P" \
                   --argjson temperature "$TEMPERATURE" \
                   '{
+                    name: $ASSISTANT_NAME,
                     instructions: $instructions,
                     model: $model,
                     top_p: $top_p,
