@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - openapi/assistant/update_instructions.yaml
+      - update_scenario_path.txt
 
 jobs:
   update-instructions:
@@ -15,71 +15,77 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Extract assistant_id
-        id: get_assistant_id
-        uses: mikefarah/yq@master
-        with:
-          cmd: |
-            yq '.assistant_id' openapi/assistant/update_instructions.yaml
-      - name: Set environment variables ASSISTANT_ID
-        run: echo "ASSISTANT_ID=${{ steps.get_assistant_id.outputs.result }}" >> $GITHUB_ENV
-
-      - name: Extract tenant_name
-        id: get_tenant_name
-        uses: mikefarah/yq@master
-        with:
-          cmd: |
-            yq '.tenant_name' openapi/assistant/update_instructions.yaml
-      - name: Set environment variables TENANT_NAME
-        run: echo "TENANT_NAME=${{ steps.get_tenant_name.outputs.result }}" >> $GITHUB_ENV
-
-      - name: Extract instructions
-        id: get_instructions
-        uses: mikefarah/yq@master
-        with:
-          cmd: |
-            yq '.instructions' openapi/assistant/update_instructions.yaml
-      - name: Set environment variables INSTRUCTIONS
-        run: echo "INSTRUCTIONS=${{ steps.get_instructions.outputs.result }}" >> $GITHUB_ENV
-
-      - name: Set API Key based on tenant_name
+    - name: Update OpenAI Assistant Instructions
         run: |
-          case "${{ env.TENANT_NAME }}" in
-            "demo")
-              echo "PROJECT_API_KEY=${{ secrets.OPENAI_DEMO_PROJECT_API_KEY }}" >> $GITHUB_ENV
-              ;;
-            "rakuten-cc")
-              echo "PROJECT_API_KEY=${{ secrets.OPENAI_RAKUTEN_CC_PROJECT_API_KEY }}" >> $GITHUB_ENV
-              ;;
-            "rakuten-rookie")
-              echo "PROJECT_API_KEY=${{ secrets.OPENAI_RAKUTEN_ROOKIE_PROJECT_API_KEY }}" >> $GITHUB_ENV
-              ;;
-            "bs24")
-              echo "PROJECT_API_KEY=${{ secrets.OPENAI_BS_24_PROJECT_API_KEY }}" >> $GITHUB_ENV
-              ;;
-            *)
-              echo "Error: Unknown tenant_name '${{ env.TENANT_NAME }}'"
+        # ファイルが存在するか確認
+        if [[ -f paths.txt ]]; then
+          echo "Reading paths from paths.txt..."
+          while IFS= read -r path; do
+            echo "Processing $path"
+            # ここで任意の処理を実行
+            # 例: ファイルの内容を表示
+            if [[ -d $path ]]; then
+              cat "$path"
+
+              SETTING_FILE = "${path}/setting.json"
+              ASSISTANT_ID=$(jq -r '.assistant_id' "$SETTING_FILE")
+              ASSISTANT_NAME=$(jq -r '.assistant_name' "$SETTING_FILE")
+              MODEL=$(jq -r '.model' "$SETTING_FILE")
+              TOP_P=$(jq -r '.top_p' "$SETTING_FILE")
+              TEMPERATURE=$(jq -r '.temperature' "$SETTING_FILE")
+              RESPONSE_FORMAT=$(jq -r '.response_format' "$SETTING_FILE")
+              TENANT_NAME=$(jq -r '.tenant_name' "$SETTING_FILE")
+              INSTRUCTION_FILE = "${path}/instruction.txt"
+              INSTRUCTION=$(cat "$INSTRUCTION_FILE" | jq -Rsa .)
+
+              case "$TENANT_NAME" in
+                "demo")
+                  echo "PROJECT_API_KEY=${{ secrets.OPENAI_DEMO_PROJECT_API_KEY }}"
+                  ;;
+                "rakuten-cc")
+                  echo "PROJECT_API_KEY=${{ secrets.OPENAI_RAKUTEN_CC_PROJECT_API_KEY }}"
+                  ;;
+                "rakuten-rookie")
+                  echo "PROJECT_API_KEY=${{ secrets.OPENAI_RAKUTEN_ROOKIE_PROJECT_API_KEY }}"
+                  ;;
+                "bs24")
+                  echo "PROJECT_API_KEY=${{ secrets.OPENAI_BS_24_PROJECT_API_KEY }}"
+                  ;;
+                *)
+                  echo "Error: Unknown tenant_name '${{ TENANT_NAME }}'"
+                  exit 1
+                  ;;
+              esac
+
+              RESPONSE=$(curl -s -o response.json -w "%{http_code}" \
+                -X POST \
+                "https://api.openai.com/v1/assistants/${{ ASSISTANT_ID }}" \
+                -H "Content-Type: application/json" \
+                -H "OpenAI-Beta: assistants=v2" \
+                -H "OpenAI-Project: ${{ PROJECT_API_KEY }}" \
+                -d "{
+                  \"instructions\": \"${{ INSTRUCTION }}\",
+                  \"model\": \"${{ MODEL }}\",
+                  \"top_p\": ${{ TOP_P }},
+                  \"temperature\": ${{ TEMPERATURE }},
+                  \"response_format\": \"${{ RESPONSE_FORMAT }}\"
+                }")
+
+              if [ "$RESPONSE" -ne 200 ]; then
+                echo "Failed to update assistant instructions"
+                cat response.json
+                exit 1
+              else
+                echo "Assistant instructions updated successfully"
+                cat response.json
+              fi
+
+            else
+              echo "$path does not exist."
               exit 1
-              ;;
-          esac
-
-      - name: Update OpenAI Assistant Instructions using curl
-        run: |
-          RESPONSE=$(curl -s -o response.json -w "%{http_code}" \
-            -X POST \
-            "https://api.openai.com/v1/assistants/${{ env.ASSISTANT_ID }}" \
-            -H "Content-Type: application/json" \
-            -H "OpenAI-Beta: assistants=v2" \
-            -H "OpenAI-Project: ${{ env.PROJECT_API_KEY }}" \
-            -d "{
-              \"instructions\": \"${{ env.INSTRUCTIONS }}\"
-            }")
-
-          if [ "$RESPONSE" -ne 200 ]; then
-            echo "Failed to update assistant instructions"
-            cat response.json
-            exit 1
-          else
-            echo "Assistant instructions updated successfully"
-            cat response.json
-          fi
+            fi
+          done < paths.txt
+        else
+          echo "paths.txt not found. Exiting."
+          exit 1
+        fi
