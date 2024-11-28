@@ -15,14 +15,32 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Extract assistant_id and tenant_name
-        id: extract_variables
+      - name: Extract assistant_id
+        id: get_assistant_id
         uses: mikefarah/yq@master
         with:
           cmd: |
-            echo "ASSISTANT_ID=$(yq '.assistant_id' ./openapi/assistant/update_instructions.yaml')" >> $GITHUB_ENV
-            echo "TENANT_NAME=$(yq '.tenant_name' ./openapi/assistant/update_instructions.yaml')" >> $GITHUB_ENV
-            echo "INSTRUCTIONS=$(yq '.instructions' ./openapi/assistant/update_instructions.yaml')" >> $GITHUB_ENV
+            yq '.assistant_id' openapi/assistant/update_instructions.yaml
+      - name: Set environment variables ASSISTANT_ID
+        run: echo "ASSISTANT_ID=${{ steps.get_assistant_id.outputs.result }}" >> $GITHUB_ENV
+
+      - name: Extract tenant_name
+        id: get_tenant_name
+        uses: mikefarah/yq@master
+        with:
+          cmd: |
+            yq '.tenant_name' openapi/assistant/update_instructions.yaml
+      - name: Set environment variables TENANT_NAME
+        run: echo "TENANT_NAME=${{ steps.tenant_name.outputs.result }}" >> $GITHUB_ENV
+
+      - name: Extract instructions
+        id: get_instructions
+        uses: mikefarah/yq@master
+        with:
+          cmd: |
+            yq '.instructions' openapi/assistant/update_instructions.yaml
+      - name: Set environment variables INSTRUCTIONS
+        run: echo "INSTRUCTIONS=${{ steps.get_instructions.outputs.result }}" >> $GITHUB_ENV
 
       - name: Set API Key based on tenant_name
         run: |
