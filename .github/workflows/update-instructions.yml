@@ -63,7 +63,7 @@ jobs:
                   --arg name "$ASSISTANT_NAME" \
                   --arg instructions "$INSTRUCTION" \
                   --arg model "$MODEL" \
-                  --arg response_format "$RESPONSE_FORMAT" \
+                  --argjson response_format "$RESPONSE_FORMAT" \
                   --argjson top_p "$TOP_P" \
                   --argjson temperature "$TEMPERATURE" \
                   '{
