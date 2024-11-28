@@ -1,1 +1,2 @@
 scenarios/rakuten-cc/生保toC_顧客AI
+scenarios/rakuten-cc/生保toC_業務遂行AI
