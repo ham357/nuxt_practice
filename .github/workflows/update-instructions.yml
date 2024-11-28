@@ -54,13 +54,7 @@ jobs:
                   echo "Error: Unknown tenant_name ${TENANT_NAME}"
                   exit 1
                   ;;
-              esac
-
-                # 必要な変数の存在を確認
-                if [[ -z "$ASSISTANT_ID" || -z "$PROJECT_API_KEY" || -z "$MODEL" || -z "$TOP_P" || -z "$TEMPERATURE" || -z "$RESPONSE_FORMAT" || -z "$INSTRUCTION" ]]; then
-                  echo "Error: Missing one or more required variables."
-                  exit 1
-                fi
+                esac
 
                 # JSONデータの安全な生成
                 JSON_PAYLOAD=$(jq -n \
