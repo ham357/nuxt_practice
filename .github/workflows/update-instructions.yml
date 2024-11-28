@@ -34,7 +34,7 @@ jobs:
                 MODEL=$(jq -r '.model' "$SETTING_FILE")
                 TOP_P=$(jq -r '.top_p' "$SETTING_FILE")
                 TEMPERATURE=$(jq -r '.temperature' "$SETTING_FILE")
-                RESPONSE_FORMAT=$(jq -r '.response_format' "$SETTING_FILE")
+                RESPONSE_FORMAT=$(jq -r '.response_format' "$SETTING_FILE"| jq '@json')
                 TENANT_NAME=$(jq -r '.tenant_name' "$SETTING_FILE")
                 INSTRUCTION_FILE="${path}/instruction.txt"
                 INSTRUCTION=$(cat "$INSTRUCTION_FILE")
@@ -63,6 +63,7 @@ jobs:
                   --arg name "$ASSISTANT_NAME" \
                   --arg instructions "$INSTRUCTION" \
                   --arg model "$MODEL" \
+                  --argjson response_format "$RESPONSE_FORMAT" \
                   --argjson top_p "$TOP_P" \
                   --argjson temperature "$TEMPERATURE" \
                   '{
@@ -71,7 +72,7 @@ jobs:
                     model: $model,
                     top_p: $top_p,
                     temperature: $temperature,
-                    response_format: $RESPONSE_FORMAT
+                    response_format: $response_format
                   }')
 
                 # ASSISTANT_IDの有無でcreate or updateを判定
