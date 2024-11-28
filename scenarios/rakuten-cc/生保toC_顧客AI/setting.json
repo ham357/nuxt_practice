@@ -6,6 +6,5 @@
   "temperature": 0.01,
   "response_format": {
     "type": "text"
-  },
-  "tenant_name": "demo"
+  }
 }

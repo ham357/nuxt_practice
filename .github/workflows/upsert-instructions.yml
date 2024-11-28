@@ -5,7 +5,12 @@ on:
     branches:
       - main
     paths:
-      - upsert_scenario_path.txt
+      - scenarios/**/setting.json
+      - scenarios/**/instruction.txt
+    paths-ignore:
+      - scenarios/**/common/setting.json
+      - scenarios/template/**/setting.json
+      - scenarios/template/**/instruction.txt
 
 jobs:
   upsert-instructions:
@@ -35,7 +40,11 @@ jobs:
                 TOP_P=$(jq -r '.top_p' "$SETTING_FILE")
                 TEMPERATURE=$(jq -r '.temperature' "$SETTING_FILE")
                 RESPONSE_FORMAT=$(jq '.response_format' "$SETTING_FILE")
-                TENANT_NAME=$(jq -r '.tenant_name' "$SETTING_FILE")
+
+                parent_dir=$(dirname "$path")
+                COMMON_SETTING_FILE="${parent_dir}/common/setting.json"
+                TENANT_NAME=$(jq -r '.tenant_name' "$COMMON_SETTING_FILE")
+
                 INSTRUCTION_FILE="${path}/instruction.txt"
                 INSTRUCTION=$(cat "$INSTRUCTION_FILE")
 
