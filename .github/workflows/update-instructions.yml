@@ -84,8 +84,8 @@ jobs:
                 echo "$path does not exist."
                 exit 1
               fi
-            done < paths.txt
+            done < update_scenario_path.txt
           else
-            echo "paths.txt not found. Exiting."
+            echo "update_scenario_path.txt not found. Exiting."
             exit 1
           fi
