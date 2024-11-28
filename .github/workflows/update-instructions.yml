@@ -38,23 +38,23 @@ jobs:
                 INSTRUCTION=$(cat "$INSTRUCTION_FILE" | jq -Rsa .)
 
                 case "$TENANT_NAME" in
-                  "demo")
-                    echo "PROJECT_API_KEY=${{ secrets.OPENAI_DEMO_PROJECT_API_KEY }}"
-                    ;;
-                  "rakuten-cc")
-                    echo "PROJECT_API_KEY=${{ secrets.OPENAI_RAKUTEN_CC_PROJECT_API_KEY }}"
-                    ;;
-                  "rakuten-rookie")
-                    echo "PROJECT_API_KEY=${{ secrets.OPENAI_RAKUTEN_ROOKIE_PROJECT_API_KEY }}"
-                    ;;
-                  "bs24")
-                    echo "PROJECT_API_KEY=${{ secrets.OPENAI_BS_24_PROJECT_API_KEY }}"
-                    ;;
-                  *)
-                    echo "Error: Unknown tenant_name ${TENANT_NAME}"
-                    exit 1
-                    ;;
-                esac
+                "demo")
+                  PROJECT_API_KEY="${{ secrets.OPENAI_DEMO_PROJECT_API_KEY }}"
+                  ;;
+                "rakuten-cc")
+                  PROJECT_API_KEY="${{ secrets.OPENAI_RAKUTEN_CC_PROJECT_API_KEY }}"
+                  ;;
+                "rakuten-rookie")
+                  PROJECT_API_KEY="${{ secrets.OPENAI_RAKUTEN_ROOKIE_PROJECT_API_KEY }}"
+                  ;;
+                "bs24")
+                  PROJECT_API_KEY="${{ secrets.OPENAI_BS_24_PROJECT_API_KEY }}"
+                  ;;
+                *)
+                  echo "Error: Unknown tenant_name ${TENANT_NAME}"
+                  exit 1
+                  ;;
+              esac
 
                 # 必要な変数の存在を確認
                 if [[ -z "$ASSISTANT_ID" || -z "$PROJECT_API_KEY" || -z "$MODEL" || -z "$TOP_P" || -z "$TEMPERATURE" || -z "$RESPONSE_FORMAT" || -z "$INSTRUCTION" ]]; then
