@@ -25,8 +25,6 @@ jobs:
               # ここで任意の処理を実行
               # 例: ファイルの内容を表示
               if [[ -d $path ]]; then
-                cat "$path"
-
                 SETTING_FILE = "${path}/setting.json"
                 ASSISTANT_ID=$(jq -r '.assistant_id' "$SETTING_FILE")
                 ASSISTANT_NAME=$(jq -r '.assistant_name' "$SETTING_FILE")
