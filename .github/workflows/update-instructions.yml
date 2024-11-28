@@ -52,7 +52,7 @@ jobs:
                     echo "PROJECT_API_KEY=${{ secrets.OPENAI_BS_24_PROJECT_API_KEY }}"
                     ;;
                   *)
-                    echo "Error: Unknown tenant_name '${{ TENANT_NAME }}'"
+                    echo "Error: Unknown tenant_name ${TENANT_NAME}"
                     exit 1
                     ;;
                 esac
