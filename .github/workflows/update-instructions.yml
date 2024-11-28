@@ -72,7 +72,7 @@ jobs:
                     model: $model,
                     top_p: $top_p,
                     temperature: $temperature,
-                    response_format: $response_format
+                    response_format: $RESPONSE_FORMAT
                   }')
 
                 # ASSISTANT_IDの有無でcreate or updateを判定
