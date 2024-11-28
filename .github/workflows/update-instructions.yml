@@ -71,10 +71,17 @@ jobs:
                     response_format: $response_format
                   }')
 
+                # ASSISTANT_IDの有無でcreate or updateを判定
+                if [[ -n "$ASSISTANT_ID" ]]; then
+                  URL="https://api.openai.com/v1/assistants/${ASSISTANT_ID}"
+                else
+                  URL="https://api.openai.com/v1/assistants"
+                fi
+
                 # curlコマンドでリクエストを送信
                 RESPONSE=$(curl -s -o response.json -w "%{http_code}" \
                   -X POST \
-                  "https://api.openai.com/v1/assistants/${ASSISTANT_ID}" \
+                  "$URL" \
                   -H "Content-Type: application/json" \
                   -H "OpenAI-Beta: assistants=v2" \
                   -H "Authorization: Bearer ${PROJECT_API_KEY}" \
