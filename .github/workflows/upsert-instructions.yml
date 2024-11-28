@@ -1,25 +1,25 @@
-name: Update OpenAI Assistant Instructions
+name: Upsert OpenAI Assistant Instructions
 
 on:
   push:
     branches:
       - main
     paths:
-      - update_scenario_path.txt
+      - upsert_scenario_path.txt
 
 jobs:
-  update-instructions:
+  upsert-instructions:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Update OpenAI Assistant Instructions
+      - name: Upsert OpenAI Assistant Instructions
         run: |
           # ファイルが存在するか確認
-          if [[ -f update_scenario_path.txt ]]; then
-            echo "Reading paths from update_scenario_path.txt..."
+          if [[ -f upsert_scenario_path.txt ]]; then
+            echo "Reading paths from upsert_scenario_path.txt..."
             while IFS= read -r path; do
               echo ""
               echo "========================="
@@ -107,8 +107,8 @@ jobs:
                 echo "$path does not exist."
                 exit 1
               fi
-            done < update_scenario_path.txt
+            done < upsert_scenario_path.txt
           else
-            echo "update_scenario_path.txt not found. Exiting."
+            echo "upsert_scenario_path.txt not found. Exiting."
             exit 1
           fi
