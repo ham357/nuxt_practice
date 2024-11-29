@@ -1,22 +1,23 @@
-name: Upsert OpenAI Assistant Instructions
+name: Upsert OpenAI Assistant
 
 on:
   push:
     branches:
       - main
     paths:
+      - upsert_scenario_path.txt
       - scenarios/**/setting.json
       - scenarios/**/instruction.txt
 
 jobs:
-  upsert-instructions:
+  upsert-assistant:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Upsert OpenAI Assistant Instructions
+      - name: Upsert OpenAI Assistant
         run: |
           # ファイルが存在するか確認
           if [[ -f upsert_scenario_path.txt ]]; then
@@ -39,12 +40,12 @@ jobs:
 
                 parent_dir=$(dirname "$path")
                 COMMON_SETTING_FILE="${parent_dir}/common/setting.json"
-                TENANT_NAME=$(jq -r '.tenant_name' "$COMMON_SETTING_FILE")
+                PROJECT_NAME=$(jq -r '.project_name' "$COMMON_SETTING_FILE")
 
                 INSTRUCTION_FILE="${path}/instruction.txt"
                 INSTRUCTION=$(cat "$INSTRUCTION_FILE")
 
-                case "$TENANT_NAME" in
+                case "$PROJECT_NAME" in
                 "demo")
                   PROJECT_API_KEY="${{ secrets.OPENAI_DEMO_PROJECT_API_KEY }}"
                   ;;
@@ -58,7 +59,7 @@ jobs:
                   PROJECT_API_KEY="${{ secrets.OPENAI_BS_24_PROJECT_API_KEY }}"
                   ;;
                 *)
-                  echo "Error: Unknown tenant_name ${TENANT_NAME}"
+                  echo "Error: Unknown project_name ${PROJECT_NAME}"
                   exit 1
                   ;;
                 esac
