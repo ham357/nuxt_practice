@@ -111,7 +111,7 @@ jobs:
             cat response.json
 
             id=$(jq -r '.id' response.json)
-            jq --arg assistant_id "${{ env.extracted_id }}" '.assistant_id = $assistant_id' scenarios/rakuten-cc/rakuten-cc/setting.json > tmp.json
+            jq --arg assistant_id "$id" '.assistant_id = $assistant_id' scenarios/rakuten-cc/rakuten-cc/setting.json > tmp.json
             mv tmp.json $SETTING_FILE
           done
 
