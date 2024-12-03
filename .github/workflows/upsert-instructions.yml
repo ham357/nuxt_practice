@@ -32,7 +32,7 @@ jobs:
             echo "$dir was changed"
             parent_dir=$(dirname "$dir")
 
-            SETTING_FILE="${parent_dir}/setting.json"
+            SETTING_FILE="${dir}/setting.json"
             ASSISTANT_ID=$(jq -r '.assistant_id' "$SETTING_FILE")
             ASSISTANT_NAME=$(jq -r '.assistant_name' "$SETTING_FILE")
             MODEL=$(jq -r '.model' "$SETTING_FILE")
@@ -40,7 +40,7 @@ jobs:
             TEMPERATURE=$(jq -r '.temperature' "$SETTING_FILE")
             RESPONSE_FORMAT=$(jq '.response_format' "$SETTING_FILE")
 
-            COMMON_SETTING_FILE="${dir}/common/setting.json"
+            COMMON_SETTING_FILE="${parent_dir}/common/setting.json"
             PROJECT_NAME=$(jq -r '.project_name' "$COMMON_SETTING_FILE")
 
             INSTRUCTION_FILE="${dir}/instruction.txt"
