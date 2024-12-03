@@ -91,12 +91,13 @@ jobs:
             # ASSISTANT_IDの有無でcreate or updateを判定
             if [[ -n "$ASSISTANT_ID" ]]; then
               URL="https://api.openai.com/v1/assistants/${ASSISTANT_ID}"
-              ACTION_TYPE="update" >> $GITHUB_ENV
+              echo ACTION_TYPE="update" >> $GITHUB_ENV
             else
               URL="https://api.openai.com/v1/assistants"
-              ACTION_TYPE="create" >> $GITHUB_ENV
+              echo ACTION_TYPE="create" >> $GITHUB_ENV
             fi
-
+            echo env.ACTION_TYPE
+cat env.ACTION_TYPE
             # curlコマンドでリクエストを送信
             RESPONSE=$(curl -s -o response.json -w "%{http_code}" \
               -X POST \
@@ -119,7 +120,7 @@ jobs:
             cat response.json
 
             id=$(jq -r '.id' response.json)
-            jq --arg assistant_id "$id" '.assistant_id = $assistant_id' scenarios/rakuten-cc/rakuten-cc/setting.json > tmp.json
+            jq --arg assistant_id "$id" '.assistant_id = $assistant_id' $SETTING_FILE > tmp.json
             mv tmp.json $SETTING_FILE
           done
 
