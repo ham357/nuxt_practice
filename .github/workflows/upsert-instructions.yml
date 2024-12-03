@@ -131,11 +131,18 @@ jobs:
           git add scenarios/**/setting.json
           git commit -m "Update assistant_id in setting.json"
 
+    - name: Generate branch name with timestamp
+      id: generate_branch_name
+      run: |
+        TIMESTAMP=$(date +'%Y%m%d-%H%M%S')
+        BRANCH_NAME="update-assistant-id-${TIMESTAMP}"
+        echo "branch_name=$BRANCH_NAME" >> $GITHUB_ENV
+
       - name: Create Pull Request
         if: env.ACTION_TYPE == 'create'
         uses: peter-evans/create-pull-request@v5
         with:
-          branch: "update-assistant-id--$(date +'%Y%m%d-%H%M%S')"
+          branch: ${{ env.branch_name }}
           base: main
           title: "Update assistant_id in setting.json for ${{ github.event.head_commit.message }}"
           body: |
