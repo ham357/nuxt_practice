@@ -135,9 +135,9 @@ jobs:
         if: env.ACTION_TYPE == 'create'
         uses: peter-evans/create-pull-request@v5
         with:
-          branch: "update-assistant-id-${{ github.event.head_commit.message }}"
+          branch: "update-assistant-id--$(date +'%Y%m%d-%H%M%S')"
           base: main
-          title: "Update assistant_id in setting.json for branch ${{ github.event.head_commit.message }}"
+          title: "Update assistant_id in setting.json for ${{ github.event.head_commit.message }}"
           body: |
             This PR updates the assistant_id in setting.json.
             It was triggered from the branch: ${{ github.event.head_commit.message }}.
