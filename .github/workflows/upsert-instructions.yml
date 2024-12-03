@@ -70,6 +70,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add scenarios/**/setting.json
           git commit -m "Update assistant_id in setting.json"
+          git checkout .
 
       - name: Generate branch name with timestamp
         if: env.ACTION_TYPE == 'create'
