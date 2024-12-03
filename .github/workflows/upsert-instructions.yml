@@ -63,6 +63,15 @@ jobs:
             ./upsert_openai_assistant.sh "$PROJECT_API_KEY" "$dir"
           done
 
+      - name: Commit changes
+        if: env.ACTION_TYPE == 'create'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add scenarios/**/setting.json
+          git commit -m "Update assistant_id in setting.json"
+          git checkout .
+
       - name: Generate branch name with timestamp
         if: env.ACTION_TYPE == 'create'
         id: generate_branch_name
