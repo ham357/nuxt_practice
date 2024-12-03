@@ -20,14 +20,8 @@ jobs:
       - name: Get changed files in the docs folder
         id: changed-files-specific
         uses: tj-actions/changed-files@v45
-        with:
-          files: |
-            - scenarios/**/setting.json
-            - scenarios/**/instruction.txt
-          files_ignore: scenarios/common
 
       - name: Run step if any file(s) in the docs folder change
-        if: steps.changed-files-specific.outputs.any_changed == 'true'
         env:
           ALL_CHANGED_FILES: ${{ steps.changed-files-specific.outputs.all_changed_files }}
         run: |
