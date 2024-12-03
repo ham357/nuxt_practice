@@ -147,4 +147,4 @@ jobs:
           title: "Update assistant_id in setting.json for ${{ github.event.head_commit.message }}"
           body: |
             This PR updates the assistant_id in setting.json.
-            It was triggered from the branch: ${{ github.event.head_commit.message }}.
+            It was triggered for: ${{ github.event.head_commit.message }}.
