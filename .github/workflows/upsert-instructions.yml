@@ -97,7 +97,7 @@ jobs:
               echo ACTION_TYPE="create" >> $GITHUB_ENV
             fi
             echo env.ACTION_TYPE
-cat env.ACTION_TYPE
+            cat env.ACTION_TYPE
             # curlコマンドでリクエストを送信
             RESPONSE=$(curl -s -o response.json -w "%{http_code}" \
               -X POST \
