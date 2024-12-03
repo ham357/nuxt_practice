@@ -25,7 +25,7 @@ jobs:
             scenarios/**/instruction.txt
           files_ignore: scenarios/common/setting.json
 
-      - name: Run step if any file(s) in the docs folder change
+      - name: Upsert OpenAI Assistant
         if: steps.changed-files-specific.outputs.any_changed == 'true'
         env:
           ALL_CHANGED_FILES: ${{ steps.changed-files-specific.outputs.all_changed_files }}
@@ -132,6 +132,7 @@ jobs:
           git commit -m "Update assistant_id in setting.json"
 
       - name: Generate branch name with timestamp
+        if: env.ACTION_TYPE == 'create'
         id: generate_branch_name
         run: |
           TIMESTAMP=$(date +'%Y%m%d-%H%M%S')
@@ -142,6 +143,7 @@ jobs:
         if: env.ACTION_TYPE == 'create'
         uses: peter-evans/create-pull-request@v5
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ env.branch_name }}
           base: main
           title: "Update assistant_id in setting.json for ${{ github.event.head_commit.message }}"
