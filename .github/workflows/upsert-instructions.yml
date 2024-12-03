@@ -28,8 +28,9 @@ jobs:
           # ディレクトリ部分をユニーク化
           UNIQUE_DIRS=$(echo "$ALL_CHANGED_FILES" | tr ' ' '\n' | xargs -n 1 dirname | sort | uniq)
 
-          for parent_dir in ${UNIQUE_DIRS}; do
-            echo "$parent_dir was changed"
+          for dir in ${UNIQUE_DIRS}; do
+            echo "$dir was changed"
+            parent_dir=$(dirname "$dir")
 
             SETTING_FILE="${parent_dir}/setting.json"
             ASSISTANT_ID=$(jq -r '.assistant_id' "$SETTING_FILE")
@@ -39,10 +40,10 @@ jobs:
             TEMPERATURE=$(jq -r '.temperature' "$SETTING_FILE")
             RESPONSE_FORMAT=$(jq '.response_format' "$SETTING_FILE")
 
-            COMMON_SETTING_FILE="${parent_dir}/common/setting.json"
+            COMMON_SETTING_FILE="${dir}/common/setting.json"
             PROJECT_NAME=$(jq -r '.project_name' "$COMMON_SETTING_FILE")
 
-            INSTRUCTION_FILE="${parent_dir}/instruction.txt"
+            INSTRUCTION_FILE="${dir}/instruction.txt"
             INSTRUCTION=$(cat "$INSTRUCTION_FILE")
 
             case "$PROJECT_NAME" in
