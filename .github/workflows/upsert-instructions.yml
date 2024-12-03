@@ -90,3 +90,4 @@ jobs:
           body: |
             This PR updates the assistant_id in setting.json.
             It was triggered for: ${{ github.event.head_commit.message }}.
+          commit: false #自動コミットを無効化
