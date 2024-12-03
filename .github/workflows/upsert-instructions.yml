@@ -5,7 +5,6 @@ on:
     branches:
       - main
     paths:
-      - upsert_scenario_path.txt
       - scenarios/**/setting.json
       - scenarios/**/instruction.txt
 
@@ -136,8 +135,10 @@ jobs:
         if: env.ACTION_TYPE == 'create'
         uses: peter-evans/create-pull-request@v5
         with:
-          branch: update-assistant-id
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          branch: "update-assistant-id-${{ github.ref_name }}"
           base: main
-          title: "Update assistant_id in setting.json"
+          title: "Update assistant_id in setting.json for branch ${{ github.ref_name }}"
           body: |
             This PR updates the assistant_id in setting.json.
+            It was triggered from the branch: ${{ github.ref_name }}.
