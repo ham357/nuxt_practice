@@ -109,4 +109,24 @@ jobs:
             # 正常終了の場合
             echo "Request was successful. Response:"
             cat response.json
+
+            id=$(jq -r '.id' response.json)
+            jq --arg assistant_id "${{ env.extracted_id }}" '.assistant_id = $assistant_id' scenarios/rakuten-cc/rakuten-cc/setting.json > tmp.json
+            mv tmp.json $SETTING_FILE
           done
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "Update assistant_id in setting.json"
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          branch: update-assistant-id
+          base: main
+          title: "Update assistant_id in setting.json"
+          body: |
+            This PR updates the assistant_id in $SETTING_FILE based on the value from response.json.
