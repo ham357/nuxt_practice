@@ -20,6 +20,11 @@ jobs:
       - name: Get changed files in the docs folder
         id: changed-files-specific
         uses: tj-actions/changed-files@v45
+        with:
+          files: |
+            - scenarios/**/setting.json
+            - scenarios/**/instruction.txt
+          files_ignore: scenarios/common/setting.json
 
       - name: Run step if any file(s) in the docs folder change
         env:
@@ -119,7 +124,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add .
+          git add scenarios/**/setting.json
           git commit -m "Update assistant_id in setting.json"
 
       - name: Create Pull Request
