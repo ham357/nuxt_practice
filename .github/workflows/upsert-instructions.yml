@@ -32,6 +32,7 @@ jobs:
         run: |
           # ディレクトリ部分をユニーク化
           UNIQUE_DIRS=$(echo "$ALL_CHANGED_FILES" | tr ' ' '\n' | xargs -n 1 dirname | sort | uniq)
+          chmod +x upsert_openai_assistant.sh
 
           for dir in ${UNIQUE_DIRS}; do
             echo "$dir was changed"
