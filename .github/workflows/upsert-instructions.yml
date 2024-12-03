@@ -136,9 +136,9 @@ jobs:
         uses: peter-evans/create-pull-request@v5
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          branch: "update-assistant-id-${{ github.ref_name }}"
+          branch: "update-assistant-id-${{ github.event.pull_request.head.ref }}"
           base: main
-          title: "Update assistant_id in setting.json for branch ${{ github.ref_name }}"
+          title: "Update assistant_id in setting.json for branch ${{ github.event.pull_request.head.ref }}"
           body: |
             This PR updates the assistant_id in setting.json.
-            It was triggered from the branch: ${{ github.ref_name }}.
+            It was triggered from the branch: ${{ github.event.pull_request.head.ref }}.
