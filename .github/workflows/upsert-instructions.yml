@@ -140,4 +140,4 @@ jobs:
           base: main
           title: "Update assistant_id in setting.json"
           body: |
-            This PR updates the assistant_id in $SETTING_FILE based on the value from response.json.
+            This PR updates the assistant_id in setting.json.
