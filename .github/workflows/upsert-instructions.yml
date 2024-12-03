@@ -91,8 +91,10 @@ jobs:
             # ASSISTANT_IDの有無でcreate or updateを判定
             if [[ -n "$ASSISTANT_ID" ]]; then
               URL="https://api.openai.com/v1/assistants/${ASSISTANT_ID}"
+              ACTION_TYPE="update" >> $GITHUB_ENV
             else
               URL="https://api.openai.com/v1/assistants"
+              ACTION_TYPE="create" >> $GITHUB_ENV
             fi
 
             # curlコマンドでリクエストを送信
@@ -122,6 +124,7 @@ jobs:
           done
 
       - name: Commit changes
+        if: env.ACTION_TYPE == 'create'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -129,6 +132,7 @@ jobs:
           git commit -m "Update assistant_id in setting.json"
 
       - name: Create Pull Request
+        if: env.ACTION_TYPE == 'create'
         uses: peter-evans/create-pull-request@v5
         with:
           branch: update-assistant-id
