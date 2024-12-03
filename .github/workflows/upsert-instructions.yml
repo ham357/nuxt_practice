@@ -121,6 +121,7 @@ jobs:
             id=$(jq -r '.id' response.json)
             jq --arg assistant_id "$id" '.assistant_id = $assistant_id' $SETTING_FILE > tmp.json
             mv tmp.json $SETTING_FILE
+            rm response.json
           done
 
       - name: Commit changes
