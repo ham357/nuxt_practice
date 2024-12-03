@@ -82,7 +82,7 @@ jobs:
         if: env.ACTION_TYPE == 'create'
         uses: peter-evans/create-pull-request@v5
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ env.branch_name }}
           base: main
           title: "Update assistant_id in setting.json for ${{ github.event.head_commit.message }}"
