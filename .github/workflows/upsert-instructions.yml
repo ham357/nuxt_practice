@@ -22,11 +22,12 @@ jobs:
         uses: tj-actions/changed-files@v45
         with:
           files: |
-            - scenarios/**/setting.json
-            - scenarios/**/instruction.txt
+            scenarios/**/setting.json
+            scenarios/**/instruction.txt
           files_ignore: scenarios/common/setting.json
 
       - name: Run step if any file(s) in the docs folder change
+        if: steps.changed-files-specific.outputs.any_changed == 'true'
         env:
           ALL_CHANGED_FILES: ${{ steps.changed-files-specific.outputs.all_changed_files }}
         run: |
