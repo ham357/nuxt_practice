@@ -16,7 +16,7 @@ jobs:
       - name: Get changed files in the docs folder
         id: changed-files-specific
         uses: tj-actions/changed-files@v45
-        wiht:
+        with:
           quotepath: "false"
 
       - name: Run step if any file(s) in the docs folder change
