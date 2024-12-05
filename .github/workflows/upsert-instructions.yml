@@ -13,10 +13,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Display Japanese file names correctly without garbling
+        run: git config --global core.quotepath false
+
       - name: Get changed files in the docs folder
         id: changed-files-specific
         uses: tj-actions/changed-files@v45
-        run: git config --global core.quotepath false
 
       - name: Run step if any file(s) in the docs folder change
         if: steps.changed-files-specific.outputs.any_changed == 'true'
