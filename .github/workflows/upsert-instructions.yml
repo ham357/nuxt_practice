@@ -18,7 +18,6 @@ jobs:
         uses: tj-actions/changed-files@v45
         with:
           quotepath: false
-          safe_output: false
 
       - name: Run step if any file(s) in the docs folder change
         if: steps.changed-files-specific.outputs.any_changed == 'true'
