@@ -20,6 +20,8 @@ jobs:
         id: changed-files-specific
         uses: tj-actions/changed-files@v45
         with:
+          quotepath: false
+          safe_output: false
           files: |
             scenarios/**/setting.json
             scenarios/**/instruction.txt
