@@ -3,7 +3,7 @@ name: Upsert OpenAI Assistant
 on:
   push:
     branches:
-      - main
+      - fix_*
     paths:
       - scenarios/**/setting.json
       - scenarios/**/instruction.txt
@@ -19,75 +19,6 @@ jobs:
       - name: Get changed files in the docs folder
         id: changed-files-specific
         uses: tj-actions/changed-files@v45
-        with:
-          files: |
-            scenarios/**/setting.json
-            scenarios/**/instruction.txt
-          files_ignore: scenarios/common/setting.json
-
-      - name: Upsert OpenAI Assistant
-        if: steps.changed-files-specific.outputs.any_changed == 'true'
-        env:
-          ALL_CHANGED_FILES: ${{ steps.changed-files-specific.outputs.all_changed_files }}
-        run: |
-          # ディレクトリ部分をユニーク化
-          UNIQUE_DIRS=$(echo "$ALL_CHANGED_FILES" | tr ' ' '\n' | xargs -n 1 dirname | sort | uniq)
-          chmod +x upsert_openai_assistant.sh
-
-          for dir in ${UNIQUE_DIRS}; do
-            echo "$dir was changed"
-            parent_dir=$(dirname "$dir")
-
-            COMMON_SETTING_FILE="${parent_dir}/common/setting.json"
-            PROJECT_NAME=$(jq -r '.project_name' "$COMMON_SETTING_FILE")
-
-            case "$PROJECT_NAME" in
-            "demo")
-              PROJECT_API_KEY="${{ secrets.OPENAI_DEMO_PROJECT_API_KEY }}"
-              ;;
-            "rakuten-cc")
-              PROJECT_API_KEY="${{ secrets.OPENAI_RAKUTEN_CC_PROJECT_API_KEY }}"
-              ;;
-            "rakuten-rookie")
-              PROJECT_API_KEY="${{ secrets.OPENAI_RAKUTEN_ROOKIE_PROJECT_API_KEY }}"
-              ;;
-            "bs24")
-              PROJECT_API_KEY="${{ secrets.OPENAI_BS_24_PROJECT_API_KEY }}"
-              ;;
-            *)
-              echo "Error: Unknown project_name ${PROJECT_NAME}"
-              exit 1
-              ;;
-            esac
-
-            ./upsert_openai_assistant.sh "$PROJECT_API_KEY" "$dir"
-          done
-
-      - name: Commit changes
-        if: env.ACTION_TYPE == 'create'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add scenarios/**/setting.json
-          git commit -m "Update assistant_id in setting.json"
-          git checkout .
-
-      - name: Generate branch name with timestamp
-        if: env.ACTION_TYPE == 'create'
-        id: generate_branch_name
-        run: |
-          TIMESTAMP=$(date +'%Y%m%d-%H%M%S')
-          BRANCH_NAME="update-assistant-id-${TIMESTAMP}"
-          echo "branch_name=$BRANCH_NAME" >> $GITHUB_ENV
-
-      - name: Create Pull Request
-        if: env.ACTION_TYPE == 'create'
-        uses: peter-evans/create-pull-request@v5
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ env.branch_name }}
-          base: main
-          title: "Update assistant_id in setting.json for ${{ github.event.head_commit.message }}"
-          body: |
-            This PR updates the assistant_id in setting.json.
-            It was triggered for: ${{ github.event.head_commit.message }}.
+  env:
+    LANG: en_US.UTF-8
+    LC_ALL: C.UTF-8
