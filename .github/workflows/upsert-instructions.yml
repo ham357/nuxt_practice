@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - fix_*
-    paths:
-      - scenarios/**/setting.json
-      - scenarios/**/instruction.txt
 
 jobs:
   upsert-assistant:
@@ -19,6 +16,6 @@ jobs:
       - name: Get changed files in the docs folder
         id: changed-files-specific
         uses: tj-actions/changed-files@v45
-  env:
-    LANG: en_US.UTF-8
-    LC_ALL: C.UTF-8
+        env:
+          LANG: en_US.UTF-8
+          LC_ALL: C.UTF-8
